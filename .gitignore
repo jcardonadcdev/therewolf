@@ -1,0 +1,21 @@
+# Logs
+logs
+*.log
+
+#WebStorm project files
+.idea
+
+#built files
+dist
+
+#files downloaded by bower
+bower_components
+
+#third party libraries
+app/libs
+
+#temp files
+temp
+
+#gulp config file
+gulpconfig.json
