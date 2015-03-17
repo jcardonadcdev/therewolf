@@ -43,29 +43,39 @@
         var app = {};
 
         function init(){
+          //make new Therewolf
           var therewolf = new Therewolf();
 
+          //make map
           app.map = new Map("map", {
             basemap: "topo",
             center: [-100, 50],
             zoom: 3
           });
 
+          //make call to get county data
           request("../data/countiesFColl.json", {
             handleAs: "json"
           }).then(function(dataC){
+            //add county featurelayer to map
             var layerC = new FeatureLayer(dataC);
             app.map.addLayer(layerC);
-            console.log(app.map);
+
+            //add county data to Therewolf
             therewolf.add("Counties", dataC);
 
+            //make call to get state data
             request("../data/statesFColl.json", {
               handleAs: "json"
             }).then(function(dataS){
+              //add states featurelayer to map
               var layerS = new FeatureLayer(dataS);
               app.map.addLayer(layerS);
-              console.log(app.map);
+
+              //add state data to Therewolf
               therewolf.add("States", dataS);
+
+              //on map click, use Therewolf to find county and state containing click point
               app.map.on("click", function(evt){
                 var result,
                     state,
@@ -76,7 +86,6 @@
                   county = result.Counties ? result.Counties.NAME : "No Result";
                 }
                 else{
-                  //console.log("no result");
                   state = "No Result";
                   county = "No Result";
                 }
