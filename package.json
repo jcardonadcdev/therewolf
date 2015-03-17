@@ -1,0 +1,10 @@
+{
+  "version": "0.1.0",
+  "private": true,
+  "name": "therewolf",
+  "description": "An Esri JS API version of wherewolf",
+  "license": "MIT",
+  "devDependencies": {
+    "intern": "^2.2.2"
+  }
+}

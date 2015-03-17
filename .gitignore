@@ -19,3 +19,6 @@ temp
 
 #gulp config file
 gulpconfig.json
+
+#node modules
+node_modules
