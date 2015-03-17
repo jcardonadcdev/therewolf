@@ -3,33 +3,30 @@
       "geometryType": "esriGeometryPolygon",
       "currentVersion" : 10.3,
       "drawingInfo": {
-        "fixedSymbols": true,
         "renderer": {
           "type": "simple",
           "symbol": {
             "type": "esriSFS",
             "style": "esriSFSSolid",
-            "color": [
-              8,
-              69,
-              148,
-              191
-            ],
+            "color": [0,
+            0,
+            0,
+            0],
             "outline": {
               "type": "esriSLS",
               "style": "esriSLSSolid",
-              "color": [
-                255,
-                255,
-                255,
-                255
-              ],
-              "width": 1
+              "color": [110,
+              110,
+              110,
+              255],
+              "width": 2
             }
           },
           "label": "",
           "description": ""
-        }
+        },
+        "transparency": 0,
+        "labelingInfo": null
       },
       "objectIdField": "ObjectID",
       "fields": [
