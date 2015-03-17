@@ -63,6 +63,33 @@ define([
 
       //add the feature array to the layers object
       this._layers[id] = outFeatureArray;
+
+      return this;
+    },
+
+    /**
+     * Removes a layer by name
+     * @param name
+     * @returns {therewolf}
+     */
+    remove: function(name){
+      if(name in this._layers){
+        delete this._layers[name];
+      }
+      return this;
+    },
+
+    /**
+     * Gets the names of the loaded layers
+     * @returns {Array}
+     */
+    getLayerNames: function(){
+      var names = [],
+        n;
+      for(n in this._layers){
+        names.push(n);
+      }
+      return names;
     },
 
     /**
