@@ -2,9 +2,14 @@
   "version": "0.1.0",
   "private": true,
   "name": "therewolf",
-  "description": "An Esri JS API version of wherewolf",
+  "description": "An Esri JS API version of the wherewolf point in poly module",
   "license": "MIT",
   "devDependencies": {
-    "intern": "^2.2.2"
+    "bower": "^1.3.1",
+    "esrislurp": "^0.4.1",
+    "gulp": "^3.8.11",
+    "gulp-bower": "0.0.10",
+    "gulp-jshint": "^1.9.4",
+    "intern": ">=2.1.0"
   }
 }

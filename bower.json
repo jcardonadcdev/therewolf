@@ -1,0 +1,7 @@
+{
+  "name": "therewolf",
+  "dependencies": {
+    "dojo": "~1.10.4",
+    "util": "dojo-util#1.10.4"
+  }
+}
