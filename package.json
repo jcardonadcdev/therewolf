@@ -10,6 +10,10 @@
     "gulp": "^3.8.11",
     "gulp-bower": "0.0.10",
     "gulp-jshint": "^1.9.4",
+    "http-server": "^0.6.1",
     "intern": ">=2.1.0"
+  },
+  "scripts": {
+    "start": "http-server -a 0.0.0.0 -p 8000"
   }
 }
