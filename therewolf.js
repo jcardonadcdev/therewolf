@@ -93,6 +93,19 @@ define([
     },
 
     /**
+     * Gets the data associated with a layer name.
+     * @param name
+     * @returns {Array}
+     */
+    get: function(name){
+      var data = [];
+      if(name in this._layers){
+        data = this._layers[name];
+      }
+      return data;
+    },
+
+    /**
      * Find the polygon that the point is in.
      *
      * @param pt - Either an array of [x, y], an object of {x: Number, y: Number},
