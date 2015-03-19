@@ -38,3 +38,23 @@ console.log(result.States);
 
 ## Examples
 The data directory in this repository contains JSON of the United States boundaries in Feature Collection format. The examples directory contains simple web applications that show ways to use Therewolf.
+
+## Development
+In order to run the tests, you need to have the intern testing framework (https://theintern.github.io/). The easiest way to set up the environment is to use npm. To use this, you need to have Node.js installed (https://nodejs.org/).
+
+### Setting up the development environment
+All commands should be issued from root directory of project.
+
+1. Run `npm install`. This will install all dependencies, including gulp.
+2. Run `gulp setup`. This will download the Esri JS API and dojo libraries.
+
+### Running tests
+
+1. In a browser, navigate to http://localhost/url_for_the_therewolf_directory/tests/runIntern.html.
+2. If you do not have the project installed in a web-accessible directory, you can use a node http server. Just run `npm start` to start the http server on port 8000. Then navigate to http://localhost:8000/therewolf/tests/runIntern.html
+
+## Contributing
+
+* Suggestions can be entered by submitting an issue.
+*  To make changes, fork the repository, make changes in a branch, and submit a pull request.
+
