@@ -1,7 +1,3 @@
-/**
- * Created by jame3759 on 3/7/2015.
- */
-
 define([
   "dojo/_base/declare",
   "dojo/_base/array",
@@ -112,7 +108,7 @@ define([
      *  or a JS API Point geometry
      * @param options - Object. All properties are optional.
      *  {layer: String - Name of layer to search. If not present, all will be searched,
-     *   wholeFeature: boolean. True is flag to return whole feature. Default is false}
+     *   returnGeometry: boolean. True is flag to return whole feature. Default is false}
      */
     find: function(pt, options){
       var key, results, jspt;

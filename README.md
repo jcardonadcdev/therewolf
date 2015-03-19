@@ -9,6 +9,8 @@ This was inspired by a github repo called wherewolf, a very simple, clean, clien
 ## Data that can be used
 Therewolf uses polygon data in Esri REST JSON format (http://resources.arcgis.com/en/help/rest/apiref/geometry.html). It can be an operational layer from a Feature Collection, the format used by ArcGIS Online Web Maps (http://resources.arcgis.com/en/help/arcgis-rest-api/index.html#/Layer/02r30000004q000000/); JSON returned from a query call to a map or feature service (http://resources.arcgis.com/en/help/rest/apiref/query.html); or an array of graphics, like the graphics associated with a JS API FeatureLayer (https://developers.arcgis.com/javascript/jsapi/featurelayer-amd.html#graphics).
 
+While Dojo and non-GeoJSON data might turn off the JavaScript hipsters, I hope that the integration with Esri's data formats and easy integration with Esri's JavaScript API will make therewolf useful to some developers.
+
 ## Using Therewolf
 
 ### Loading the module in your code
@@ -41,7 +43,92 @@ console.log(result.States);
 
 ### API
 
-Coming soon
+#### add(id, features)
+Adds polygon features to therewolf using the key value `id`. The features are considered a layer with the name `id`. `features` can be any format listed above in the **Data that can be used** section.
+
+#### remove(id)
+Removes layer named `id`.
+
+```
+therewolf.remove("States");
+```
+
+#### getLayerNames()
+Returns an array of names of layers currently loaded into therewolf.
+
+#### get(id)
+Returns an array of the features in the layer named `id`. Be aware that when features are loaded into therewolf, the geometries are converted to Esri JavaScript Geometry objects. The data returned by `get` will have geometries in this format.
+
+#### find(point [, options])
+Returns information about the first polygon that `point` is in for each layer in therewolf.
+
+`options` is an object. Allowed values are:
+* `layer` - String: The name of the layer to be searched. Only information from this layer will be returned.
+* `returnGeometry` - Boolean: Flag to return the geometry of the found feature in addition to the attributes.
+
+`find` returns differently formatted data according to what was requested.
+* no options: Returns an object with properties for each layer name in therewolf. The value of the property will be the attributes of the feature that the point is in. For instance, if there are two layers in therewolf named States and Counties, and the point is in both, the return value will look like:
+
+  ```
+  {
+    States: {
+      attrib1: value,
+      ...
+      attribn: value
+    },
+    Counties: {
+      attrib1: value,
+      ...
+      attribn: value
+    }
+  }
+  ```
+
+* option.layer specified: Returns an object that just contains the attributes of the feature in the requested layer that the point is in.
+
+  ```
+  {
+    attrib1: value,
+    ...
+    attribn: value
+  }
+  ```
+
+* option.returnGeometry specified as true: The object representing the found feature will have an `attributes` and a `geometry` property.
+
+  ```
+  {
+    States: {
+      attributes: {
+        attrib1: value,
+        ...
+        attribn: value
+      },
+      geometry: Esri JS API geometry object
+    },
+    Counties: {
+      attributes: {
+        attrib1: value,
+        ...
+        attribn: value
+      },
+      geometry: Esri JS API geometry object
+    }
+  }
+  ```
+
+If the point is not in any polygon in the therewolf layer, then undefined is returned for that layer. For instance if therewolf contains a National Parks layer and a States layer, if a point is in a State but not in a park, the return would be:
+
+  ```
+  {
+    States: {
+      attrib1: value,
+      ...
+      attribn: value
+    },
+    Parks: undefined
+  }
+  ```
 
 ## Examples
 The data directory in this repository contains JSON of the U.S. State and County boundaries in Feature Collection format. The examples directory contains simple web applications that show ways to use Therewolf.
