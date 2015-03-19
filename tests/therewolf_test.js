@@ -1,18 +1,94 @@
 define([
   "../therewolf",
 
+  "esri/geometry/Point",
+
   "intern!object",
   "intern/chai!assert"
 ], function(
-  Therewolf,
+  Therewolf, Point,
   registerSuite, assert) {
 
-  function getStateData(){
-    return [{
+  function makeFields(feature){
+    var f,
+      flds = [];
+
+    if(feature && feature.attributes){
+      for(f in feature.attributes){
+        if(feature.attributes.hasOwnProperty(f)){
+          if(f.toLowerCase() === "objectid"){
+            flds.push({
+              "name": "OBJECTID",
+              "type": "esriFieldTypeOID",
+              "alias": "OBJECTID"
+            });
+          }
+          else{
+            flds.push({
+              "name": f,
+              "type": "esriFieldTypeString",
+              "alias": f,
+              "length": 50
+            });
+          }
+        }
+      }
+    }
+    return flds;
+  }
+
+  function makeQueryResponse(data){
+    var resp = {};
+
+    if(data){
+      resp = {
+        "geometryType": "esriGeometryPolygon",
+        "spatialReference": {
+          "wkid": 102100,
+          "latestWkid": 3857
+        }
+      };
+      resp.fields = makeFields(data[0]);
+      resp.features = data;
+    }
+    return resp;
+  }
+
+  function makeOperationalLayer(data){
+    var resp = {};
+
+    if(data){
+      resp = {
+        "layerDefinition": {
+          "geometryType": "esriGeometryPolygon",
+          "currentVersion": 10.3,
+          "objectIdField": "ObjectID",
+          "fields": []
+        },
+        "featureSet": {
+          "spatialReference": {
+            "wkid": 102100,
+            "latestWkid": 3857
+          },
+          "features": []
+        }
+      };
+
+      resp.layerDefinition.fields = makeFields(data[0]);
+      resp.featureSet.features = data;
+    }
+    return resp;
+  }
+
+  function getStateData(options){
+    var feats,
+      response;
+
+    feats = [{
       "attributes" : {
         "STATE_NAME" : "Rhode Island",
         "STATE_ABBR" : "RI",
-        "ObjectID" : 20
+        "OBJECTID" : 20
       },
       "geometry" :
       {
@@ -68,10 +144,23 @@ define([
           ]
       }
     }];
+    if(!options || !options.type){
+      response = feats;
+    }
+    else if(options.type === "query"){
+      response = makeQueryResponse(feats);
+    }
+    else if(options.type === "layer"){
+      response = makeOperationalLayer(feats);
+    }
+    else{
+      response = feats;
+    }
+    return response;
   }
 
-  function getCountyData(){
-    return [{
+  function getCountyData(options){
+    var feats = [{
       "attributes" : {
         "NAME" : "Washington",
         "STATE_NAME" : "Rhode Island",
@@ -99,7 +188,62 @@ define([
           ]
       }
     }];
+    if(!options || !options.type){
+      response = feats;
+    }
+    else if(options.type === "query"){
+      response = makeQueryResponse(feats);
+    }
+    else{
+      response = feats;
+    }
+    return response;
   }
+
+  function getPointInBoth(type){
+    var coords = [-7971125, 5086308],
+      pt;
+
+    if(type === "object"){
+      pt = {x: coords[0], y: coords[1]};
+    }
+    else if(type === "js"){
+      pt = new Point({
+        x: coords[0],
+        y: coords[1],
+        spatialReference: {
+          wkid: 102100
+        }
+      });
+    }
+    else{
+      pt = coords;
+    }
+    return pt;
+  }
+
+  function getPointInState(type){
+    var coords = [-7969902, 5137673],
+      pt;
+
+    if(type === "object"){
+      pt = {x: coords[0], y: coords[1]};
+    }
+    else if(type === "js"){
+      pt = new Point({
+        x: coords[0],
+        y: coords[1],
+        spatialReference: {
+          wkid: 102100
+        }
+      });
+    }
+    else{
+      pt = coords;
+    }
+    return pt;
+  }
+
   registerSuite({
     name: "add and remove layers",
     "add layers": function(){
@@ -131,5 +275,181 @@ define([
     }
   });
 
+  registerSuite({
+    name: "load different data formats",
+    "add array of features": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData(),
+        twstates;
 
+      // Test
+      tw.add("States", sd);
+      twstates = tw.get("States");
+      assert.isArray(twstates, "States data loaded from an array should be an array");
+    },
+    "add ArcGIS Server query response": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData({
+          type: "query"
+        }),
+        twstates;
+
+      // Test
+      tw.add("States", sd);
+      twstates = tw.get("States");
+      assert.isArray(twstates, "States data loaded from query response should be an array");
+    },
+    "add operational layer": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData({
+          type: "layer"
+        }),
+        twstates;
+
+      // Test
+      tw.add("States", sd);
+      twstates = tw.get("States");
+      assert.isArray(twstates, "States data loaded from an operational layer should be an array");
+    },
+    "add invalid layer": function() {
+      // Setup
+      var tw = new Therewolf(),
+        sd = {};
+
+      // Test
+      assert.throws(function () {tw.add("States", sd);}, TypeError);
+    }
+  });
+
+  registerSuite({
+    name: "perform find using different data formats",
+    "perform find using array of doubles": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData(),
+        pt =getPointInBoth(),
+        result;
+
+      // Test
+      tw.add("States", sd);
+      result = tw.find(pt);
+      assert.isObject(result, "result of find using array should be an object");
+      assert.property(result, "States", "result of find using array should have a 'States' property");
+    },
+    "perform find using object with xy properties": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData(),
+        pt =getPointInBoth("object"),
+        result;
+
+      // Test
+      tw.add("States", sd);
+      result = tw.find(pt);
+      assert.isObject(result, "result of find using object should be an object");
+      assert.property(result, "States", "result of find using object should have a 'States' property");
+    },
+    "perform find using JS API point": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData(),
+        pt =getPointInBoth("js"),
+        result;
+
+      // Test
+      tw.add("States", sd);
+      result = tw.find(pt);
+      assert.isObject(result, "result of find using JS API pt should be an object");
+      assert.property(result, "States", "result of find using JS API pt should have a 'States' property");
+    },
+    "perform find using invalid point": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData(),
+        pt = {};
+
+      // Test
+      tw.add("States", sd);
+      assert.throw(function(){tw.find(pt)}, TypeError);
+    }
+  });
+
+  registerSuite({
+    name: "perform find and specify options",
+    "perform find with no options": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData(),
+        cd = getCountyData(),
+        pt =getPointInBoth(),
+        result;
+
+      // Test
+      tw.add("States", sd);
+      tw.add("Counties", cd);
+      result = tw.find(pt);
+      assert.isObject(result, "result of find with no options should be an object");
+      assert.property(result, "States", "result of find with no options should have a 'States' property");
+      assert.property(result, "Counties", "result of find with no options should have a 'Counties' property");
+    },
+    "perform find against Counties layer": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData(),
+        cd = getCountyData(),
+        pt =getPointInBoth(),
+        result;
+
+      // Test
+      tw.add("States", sd);
+      tw.add("Counties", cd);
+      result = tw.find(pt, {layer: "Counties"});
+      assert.isObject(result, "result of find against Counties layer should be an object");
+      assert.notProperty(result, "Counties", "result of find against Counties layer should NOT have a 'Counties' property");
+      assert.property(result, "NAME", "result of find against Counties layers should have a 'NAME' property");
+    },
+    "perform find and return geometry": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData(),
+        pt =getPointInBoth(),
+        result;
+
+      // Test
+      tw.add("States", sd);
+      result = tw.find(pt, {returnGeometry: true});
+      assert.isObject(result, "result of find requesting geometry should be an object");
+      assert.property(result.States, "geometry", "result of find find requesting geometry should have a 'geometry' property");
+    },
+    "perform find against non-existent layer": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData(),
+        pt =getPointInBoth(),
+        result;
+
+      // Test
+      tw.add("States", sd);
+      result = tw.find(pt, {layer: "Bogus"});
+      assert.isUndefined(result, "result of find against a non-existent layer name should be undefined");
+    },
+    "perform find outside county": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData(),
+        cd = getCountyData(),
+        pt = getPointInState(),
+        result;
+
+      // Test
+      tw.add("States", sd);
+      tw.add("Counties", cd);
+      result = tw.find(pt);
+      assert.isObject(result, "result of find outside county should be an object");
+      assert.isUndefined(result.Counties, "result of find outside county should have a 'Counties' property that is undefined");
+    }
+  });
 });
