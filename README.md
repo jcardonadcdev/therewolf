@@ -11,6 +11,9 @@ Therewolf uses polygon data in Esri REST JSON format (http://resources.arcgis.co
 
 While Dojo and non-GeoJSON data might turn off the JavaScript hipsters, I hope that the integration with Esri's data formats and easy integration with Esri's JavaScript API will make therewolf useful to some developers.
 
+**Note:
+* The polygon data used for searching is assumed to be non-overlapping. If polygons overlap, only the first result will be returned.
+
 ## Using Therewolf
 
 ### Loading the module in your code
@@ -41,6 +44,10 @@ var result = therewolf.find([x,y]);
 console.log(result.States);
 ```
 
+**Note:
+* The structure of the search result is determined by the options used for searching. See the `find` method of the api below for details. Also see the *mapclick* example to see the structure of the results.
+
+
 ### API
 
 #### add(id, features)
@@ -57,7 +64,7 @@ therewolf.remove("States");
 Returns an array of names of layers currently loaded into therewolf.
 
 #### get(id)
-Returns an array of the features in the layer named `id`. Be aware that when features are loaded into therewolf, the geometries are converted to Esri JavaScript Geometry objects. The data returned by `get` will have geometries in this format.
+Returns an array of the features in the layer named `id`.
 
 #### find(point [, options])
 Returns information about the first polygon that `point` is in for each layer in therewolf.
@@ -117,7 +124,7 @@ Returns information about the first polygon that `point` is in for each layer in
   }
   ```
 
-If the point is not in any polygon in the therewolf layer, then undefined is returned for that layer. For instance if therewolf contains a National Parks layer and a States layer, if a point is in a State but not in a park, the return would be:
+If the point is not in any polygon in the therewolf layer, then null is returned for that layer. For instance if therewolf contains a National Parks layer and a States layer, if a point is in a State but not in a park, the return would be:
 
   ```
   {
@@ -126,7 +133,7 @@ If the point is not in any polygon in the therewolf layer, then undefined is ret
       ...
       attribn: value
     },
-    Parks: undefined
+    Parks: null
   }
   ```
 
