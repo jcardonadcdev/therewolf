@@ -144,15 +144,26 @@ define([
     },
 
     _findLayer: function(pt, layer, options){
-      var i, len, feat;
+      var i, len, feat,
+        found = null;
 
       len = layer.length;
       for(i = 0; i < len; i++){
         feat = layer[i];
         if(geometryEngine.contains(feat.geometry, pt)){
-          return options.returnGeometry ? feat : feat.attributes;
+          if(!options.returnGeometry){
+            found = feat.attributes;
+          }
+          else{
+            found = {
+              attributes: feat.attributes
+            };
+            found.geometry = feat.geometry.toJson();
+          }
+          break;
         }
       }
+      return found;
     },
 
     //Check whether a number is a number
