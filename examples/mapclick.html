@@ -16,9 +16,51 @@
         background-color: #fff; overflow:hidden;
         font-family: sans-serif;
       }
+      .nested{
+        margin-left: 10px;
+      }
       #map{
-        width: 100%;
-        height: 85%;
+        width: 70%;
+        height: 100%;
+        float: left;
+      }
+      #directions{
+        padding: 10px;
+        font-weight: 600;
+        background-color: #19469D;
+        color: #ffffff;
+        top: 0;
+        right: 30%;
+        position: absolute;
+      }
+      #searchPanel{
+        width: 30%;
+        height: 100%;
+        float: left;
+        overflow-y: scroll;
+      }
+      #searchOptions{
+        margin-top: 10px;
+        margin-left: 10px;
+      }
+      #commandPanel{
+        margin-top: 10px;
+        margin-left: 10px;
+        visibility: hidden;
+      }
+      #code{
+        width: 98%;
+        padding: 5px;
+        background-color: #dcdcdc;
+      }
+      #resultsPanel{
+        margin-top: 10px;
+        margin-left: 10px;
+        visibility: hidden;
+      }
+      #results{
+        width: 98%;
+        background-color: #dcdcdc;
       }
     </style>
     <script>
@@ -26,7 +68,7 @@
         isDebug: true,
         async: true,
         paths: {
-          wolf: location.pathname.replace(/\/[^/]+$/, "").replace("examples", "")
+          wolf: location.protocol + "//" + location.host + location.pathname.replace(/\/[^/]+$/, "").replace("examples", "")
         }
       };
     </script>
@@ -50,7 +92,7 @@
           app.map = new Map("map", {
             basemap: "topo",
             center: [-100, 50],
-            zoom: 3
+            zoom: 4
           });
 
           //make call to get county data
@@ -77,20 +119,52 @@
 
               //on map click, use Therewolf to find county and state containing click point
               app.map.on("click", function(evt){
-                var result,
-                    state,
-                    county;
-                result = therewolf.find([evt.mapPoint.x,evt.mapPoint.y]);
-                if(result){
-                  state = result.States ? result.States.STATE_NAME : "No Result";
-                  county = result.Counties ? result.Counties.NAME : "No Result";
+                var resultObj,
+                    searchLayer,
+                    returnGeom,
+                    options,
+                    command;
+
+                //clear old results
+                dojo.byId("results").innerHTML = "";
+                dojo.byId("results").visibility = "hidden";
+
+                dojo.byId("code").innerHTML = "";
+                dojo.byId("code").visibility = "hidden";
+
+                //set layer to search if needed
+                if(dojo.byId("optstate").checked){
+                  searchLayer = "States";
+                }
+                else if(dojo.byId("optcounty").checked){
+                  searchLayer = "Counties";
+                }
+
+                //set flag to return geometry if needed
+                returnGeom = dojo.byId("chkgeom").checked;
+
+                //do find with options object if defaults are overridden
+                if(searchLayer || returnGeom){
+                  options = {};
+                  if(searchLayer){
+                    options.layer = searchLayer;
+                  }
+                  if(returnGeom){
+                    options.returnGeometry = true;
+                  }
+                  command = "therewolf.find([" + evt.mapPoint.x + ", " + evt.mapPoint.y + "], " + JSON.stringify(options, null, "  ") + ")";
+                  console.log(command);
+                  resultObj = therewolf.find([evt.mapPoint.x,evt.mapPoint.y], options);
                 }
                 else{
-                  state = "No Result";
-                  county = "No Result";
+                  command = "therewolf.find([" + evt.mapPoint.x + ", " + evt.mapPoint.y + "])";
+                  resultObj = therewolf.find([evt.mapPoint.x,evt.mapPoint.y]);
                 }
-                dojo.byId("txtState").innerHTML = state;
-                dojo.byId("txtCounty").innerHTML = county;
+                dojo.byId("code").innerHTML = command;
+                dojo.byId("commandPanel").style.visibility = "visible";
+
+                dojo.byId("results").innerHTML = JSON.stringify(resultObj, null, "  ");
+                dojo.byId("resultsPanel").style.visibility = "visible";
               });
             }, function(err){
               console.log("Error retrieving state data: ", err);
@@ -105,7 +179,34 @@
   </head>
   <body>
     <div id="map"></div>
-    <p><span>State you clicked on: </span><span id="txtState"></span></p>
-    <p><span>County you clicked on: </span><span id="txtCounty"></span></p>
+    <div id="directions">
+      Change search options and then click on the map to see how the options affect the format of the results.
+    </div>
+    <div id="searchPanel">
+      <div id="searchOptions">
+        <div><strong>Search Options</strong></div>
+        <div class="nested">
+          <span>Search Layers:</span>
+          <span>
+            <input type="radio" name="layeropt" checked="checked" id="optall">All
+            <input type="radio" name="layeropt" id="optstate">States
+            <input type="radio" name="layeropt" id="optcounty">Counties
+          </span>
+        </div>
+        <div class="nested">
+          <span>Return Geometry: </span>
+          <input type="checkbox" id="chkgeom">
+        </div>
+      </div>
+      <div id="commandPanel">
+        <div><strong>Find Command</strong></div>
+        <textarea id="code" rows="4"></textarea>
+
+      </div>
+      <div id="resultsPanel">
+        <div><strong>Results</strong></div>
+        <textarea id="results" rows="20"></textarea>
+      </div>
+    </div>
   </body>
 </html>
