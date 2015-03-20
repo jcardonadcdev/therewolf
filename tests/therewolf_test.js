@@ -309,7 +309,7 @@ define([
       tw.add("States", sd);
       twstates = tw.get("States");
       assert.isArray(twstates, "States data loaded from an array should be an array");
-      assert.notProperty(twstates[0].geometry, "declaredClass", "geometry object returned from therewolf should be JSON object not JS API geometry")
+      assert.notProperty(twstates[0].geometry, "declaredClass", "geometry object returned from therewolf should be JSON object not JS API geometry");
     },
     "add ArcGIS Server query response": function(){
       // Setup
@@ -396,7 +396,9 @@ define([
 
       // Test
       tw.add("States", sd);
-      assert.throw(function(){tw.find(pt)}, TypeError);
+      assert.throw(function(){
+        tw.find(pt);
+      }, TypeError);
     }
   });
 

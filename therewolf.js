@@ -107,7 +107,7 @@ define([
           outdata.push({
             attributes: feat.attributes,
             geometry: gjson
-          })
+          });
         }
       }
       return outdata;
@@ -129,7 +129,7 @@ define([
         jspt = pt;
       }
       else if(pt && pt.x && pt.y){
-        jspt = new Point(pt)
+        jspt = new Point(pt);
       }
       else if(pt instanceof Array && pt.length === 2 && this._isNumber(pt[0]) && this._isNumber(pt[1])){
         jspt = new Point(pt);
