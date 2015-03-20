@@ -94,11 +94,23 @@ define([
      * @returns {Array}
      */
     get: function(name){
-      var data = [];
+      var outdata = null,
+        data,
+        i, len, feat, gjson;
       if(name in this._layers){
+        outdata = [];
         data = this._layers[name];
+        len = data.length;
+        for (i = 0; i < len; i++){
+          feat = data[i];
+          gjson = feat.geometry.toJson();
+          outdata.push({
+            attributes: feat.attributes,
+            geometry: gjson
+          })
+        }
       }
-      return data;
+      return outdata;
     },
 
     /**

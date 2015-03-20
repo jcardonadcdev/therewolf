@@ -244,6 +244,28 @@ define([
     return pt;
   }
 
+  function getPointOutside(type){
+    var coords = [-8632764, 5180478],
+      pt;
+
+    if(type === "object"){
+      pt = {x: coords[0], y: coords[1]};
+    }
+    else if(type === "js"){
+      pt = new Point({
+        x: coords[0],
+        y: coords[1],
+        spatialReference: {
+          wkid: 102100
+        }
+      });
+    }
+    else{
+      pt = coords;
+    }
+    return pt;
+  }
+
   registerSuite({
     name: "add and remove layers",
     "add layers": function(){
@@ -287,6 +309,7 @@ define([
       tw.add("States", sd);
       twstates = tw.get("States");
       assert.isArray(twstates, "States data loaded from an array should be an array");
+      assert.notProperty(twstates[0].geometry, "declaredClass", "geometry object returned from therewolf should be JSON object not JS API geometry")
     },
     "add ArcGIS Server query response": function(){
       // Setup
@@ -379,7 +402,7 @@ define([
 
   registerSuite({
     name: "perform find and specify options",
-    "perform find with no options": function(){
+    "perform find with no options - point inside a poly": function(){
       // Setup
       var tw = new Therewolf(),
         sd = getStateData(),
@@ -394,6 +417,22 @@ define([
       assert.isObject(result, "result of find with no options should be an object");
       assert.property(result, "States", "result of find with no options should have a 'States' property");
       assert.property(result, "Counties", "result of find with no options should have a 'Counties' property");
+    },
+    "perform find with no options - point not inside a poly": function(){
+      // Setup
+      var tw = new Therewolf(),
+        sd = getStateData(),
+        cd = getCountyData(),
+        pt =getPointOutside(),
+        result;
+
+      // Test
+      tw.add("States", sd);
+      tw.add("Counties", cd);
+      result = tw.find(pt);
+      assert.isObject(result, "result of find with no options should be an object");
+      assert.isNull(result.States, "result of find with no options should have a null 'States' property when point not in a polygon");
+      assert.isNull(result.Counties, "result of find with no options should have a null 'Counties' property when point not in a polygon");
     },
     "perform find against Counties layer": function(){
       // Setup
@@ -436,7 +475,7 @@ define([
       result = tw.find(pt, {layer: "Bogus"});
       assert.isUndefined(result, "result of find against a non-existent layer name should be undefined");
     },
-    "perform find outside county": function(){
+    "perform find outside county but inside state": function(){
       // Setup
       var tw = new Therewolf(),
         sd = getStateData(),
@@ -449,7 +488,8 @@ define([
       tw.add("Counties", cd);
       result = tw.find(pt);
       assert.isObject(result, "result of find outside county should be an object");
-      assert.isUndefined(result.Counties, "result of find outside county should have a 'Counties' property that is undefined");
+      assert.isNull(result.Counties, "result of find outside county should have a 'Counties' property that is null");
+      assert.isObject(result.States, "result of find outside county but in state should have a 'States' property that is an object");
     }
   });
 });
